@@ -1,5 +1,6 @@
 class Chess
   class Board
+    attr_accessor :grid
     class Square
       attr_accessor :row, :column, :piece,
         :above, :below, :left, :right, :top_left, :top_right, :bottom_left, :bottom_right
@@ -40,6 +41,37 @@ class Chess
         end
         return true
       end
+    end
+    def initialize
+      @grid = Hash.new
+      ('A'..'H').each do |char|
+        @grid[char] = Hash.new
+        ('1'..'8').each do |num|
+          @grid[char][num] = Square.new(char, num)
+        end
+      end
+      self.connect_squares
+    end
+
+    def connect_squares
+      @grid.each do |col_name, row|
+        row.each do |row_name, square|
+          link_neighbors(square)
+        end
+      end
+    end
+
+    def link_neighbors(square)
+      row = square.row
+      col = square.column
+      square.link(@grid[col][(row.ord+1).chr],:above) if square.above.nil? and row != '8'
+      square.link(@grid[col][(row.ord-1).chr],:below) if square.below.nil? and row != '1'
+      square.link(@grid[(col.ord-1).chr][row],:left) if square.left.nil? and col != 'A'
+      square.link(@grid[(col.ord+1).chr][row],:right) if square.right.nil? and col != 'H'
+      square.link(@grid[(col.ord-1).chr][(row.ord-1).chr],:bottom_left) if square.bottom_left.nil? and row != '1' and col != 'A'
+      square.link(@grid[(col.ord+1).chr][(row.ord-1).chr],:top_left) if square.top_left.nil? and row != '1' and col != 'H'
+      square.link(@grid[(col.ord-1).chr][(row.ord+1).chr],:bottom_right) if square.bottom_right.nil? and row != '8' and col != 'A'
+      square.link(@grid[(col.ord+1).chr][(row.ord+1).chr],:top_right) if square.top_right.nil? and row != '8' and col != 'H'
     end
 
   end

@@ -2,6 +2,48 @@ require 'Chess'
 
 describe Chess do
   describe Chess::Board do
+    subject(:board){Chess::Board.new}
+    context "When creating a new board" do
+      it "has 64 squares" do
+        count_of_squares = 0
+        board.grid.each do |col_name,row|
+            count_of_squares += row.length
+        end
+        expect(count_of_squares).to eql(64)
+      end
+      it "matches the grid coordinates to the square's row and column" do
+        rand_col = (rand(8) + 64).chr
+        rand_row = (rand(7)+1).to_s
+        test_square = board.grid[rand_col][rand_row]
+        expect(test_square.row).to eql(rand_row)
+        expect(test_square.column).to eql(rand_col)
+      end
+      it "will traverse bottom to top" do
+        start_square = board.grid['A']['1']
+        start_square = start_square.above until start_square.above.nil?
+        expect(start_square).to equal(board.grid['A']['8'])
+      end
+    end
+    context "When traversing the board" do
+      it "traverses from bottom to top" do
+        start_square = board.grid['A']['1']
+        fail_count = 0
+        until start_square.above.nil? or fail_count > 10 do
+          start_square = start_square.above
+          fail_count += 1
+        end
+        expect(start_square).to equal board.grid['A']['8']
+      end
+      it "traverses from one diagonal to another" do
+        start_square = board.grid['A']['1']
+        fail_count = 0
+        until start_square.top_right.nil? or fail_count > 10 do
+          start_square = start_square.top_right
+          fail_count += 1
+        end
+        expect(start_square).to equal board.grid['H']['8']
+      end
+    end
     describe Chess::Board::Square do
       subject(:square) {Chess::Board::Square.new('E','4')}
       context "When linking two square" do
