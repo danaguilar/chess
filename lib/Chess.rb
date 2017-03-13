@@ -1,4 +1,6 @@
+require 'colorize'
 class Chess
+  attr_accessor :board
   class Board
     attr_accessor :grid
     class Square
@@ -50,9 +52,8 @@ class Chess
           @grid[char][num] = Square.new(char, num)
         end
       end
-      self.connect_squares
+      connect_squares
     end
-
     def connect_squares
       @grid.each do |col_name, row|
         row.each do |row_name, square|
@@ -60,7 +61,6 @@ class Chess
         end
       end
     end
-
     def link_neighbors(square)
       row = square.row
       col = square.column
@@ -73,13 +73,73 @@ class Chess
       square.link(@grid[(col.ord-1).chr][(row.ord+1).chr],:bottom_right) if square.bottom_right.nil? and row != '8' and col != 'A'
       square.link(@grid[(col.ord+1).chr][(row.ord+1).chr],:top_right) if square.top_right.nil? and row != '8' and col != 'H'
     end
-
   end
+
+  def initialize(white = :white, black = :green)
+    @board = Board.new
+    @white_color = white
+    @black_color = black
+  end
+
+  def draw_board
+    system "clear" or system "cls"
+    count = 0
+    @board.grid.each do |col_name, row|
+        draw_row(row, count)
+      count += 1
+    end
+  end
+
+def draw_row(row, count)
+  3.times do |num|
+    if count%2 == 0
+      color_count = 0
+    else
+      color_count = 1
+    end
+    if num == 1
+      row.each do |row_name,square|
+        if color_count % 2 == 0
+          print (' '*2 + "♕" + ' '*3).colorize(:background => @white_color)
+        else
+          print (' '*2 + "♛" + ' '*3).colorize(:background => @black_color)
+        end
+        color_count += 1
+      end
+    else
+      row.each do |row_name,square|
+        if color_count % 2 == 0
+          print (' '*6).colorize(:background => @white_color)
+        else
+          print (' '*6).colorize(:background => @black_color)
+        end
+        color_count += 1
+      end
+    end
+    print "\n"
+  end
+end
 
 end
 
+class Piece
+  attr_accessor :column, :row, :image
+  def initialize(white = true, image = "♙")
+    @white = white
+  end
+  def is_white?
+    return @white
+  end
 
+  def is_black?
+    return !@white
+  end
+end
 
+chess = Chess.new
+chess.draw_board
+
+String.colors
 
 ##Decide what a legal move is
 ##Decide if a king is in check
