@@ -7,7 +7,9 @@ describe Chess do
       it "has 64 squares" do
         count_of_squares = 0
         board.grid.each do |col_name,row|
-            count_of_squares += row.length
+            row.each do |row_name, square|
+              count_of_squares += 1 unless square.nil?
+            end
         end
         expect(count_of_squares).to eql(64)
       end

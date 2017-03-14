@@ -1,5 +1,7 @@
 require 'colorize'
+require_relative 'Pieces.rb'
 class Chess
+include Pieces
   attr_accessor :board
   class Board
     attr_accessor :grid
@@ -10,6 +12,22 @@ class Chess
       def initialize(column='A', row='0')
         @row = row
         @column = column
+      end
+
+      def inspect
+        return "row: #{@row}, column: #{@column}, piece: #{@piece}"
+      end
+
+      def to_move
+        return "#{@column}#{@row}"
+      end
+
+      def to_s
+        if @piece.nil?
+          return ' '
+        else
+          return @piece.image
+        end
       end
 
       def link(square,direction)
@@ -46,14 +64,15 @@ class Chess
     end
     def initialize
       @grid = Hash.new
-      ('A'..'H').each do |char|
-        @grid[char] = Hash.new
-        ('1'..'8').each do |num|
-          @grid[char][num] = Square.new(char, num)
+      ('1'..'8').each do |num|
+        @grid[num] = Hash.new
+        ('A'..'H').each do |char|
+          @grid[num][char] = Square.new(char, num)
         end
       end
       connect_squares
     end
+
     def connect_squares
       @grid.each do |col_name, row|
         row.each do |row_name, square|
@@ -64,27 +83,33 @@ class Chess
     def link_neighbors(square)
       row = square.row
       col = square.column
-      square.link(@grid[col][(row.ord+1).chr],:above) if square.above.nil? and row != '8'
-      square.link(@grid[col][(row.ord-1).chr],:below) if square.below.nil? and row != '1'
-      square.link(@grid[(col.ord-1).chr][row],:left) if square.left.nil? and col != 'A'
-      square.link(@grid[(col.ord+1).chr][row],:right) if square.right.nil? and col != 'H'
-      square.link(@grid[(col.ord-1).chr][(row.ord-1).chr],:bottom_left) if square.bottom_left.nil? and row != '1' and col != 'A'
-      square.link(@grid[(col.ord+1).chr][(row.ord-1).chr],:top_left) if square.top_left.nil? and row != '1' and col != 'H'
-      square.link(@grid[(col.ord-1).chr][(row.ord+1).chr],:bottom_right) if square.bottom_right.nil? and row != '8' and col != 'A'
-      square.link(@grid[(col.ord+1).chr][(row.ord+1).chr],:top_right) if square.top_right.nil? and row != '8' and col != 'H'
+      square.link(@grid[(row.ord+1).chr][col],:above) if square.above.nil? and row != '8'
+      square.link(@grid[(row.ord-1).chr][col],:below) if square.below.nil? and row != '1'
+      square.link(@grid[row][(col.ord-1).chr],:left) if square.left.nil? and col != 'A'
+      square.link(@grid[row][(col.ord+1).chr],:right) if square.right.nil? and col != 'H'
+      square.link(@grid[(row.ord-1).chr][(col.ord-1).chr],:bottom_left) if square.bottom_left.nil? and row != '1' and col != 'A'
+      square.link(@grid[(row.ord-1).chr][(col.ord+1).chr],:top_left) if square.top_left.nil? and row != '1' and col != 'H'
+      square.link(@grid[(row.ord+1).chr][(col.ord-1).chr],:bottom_right) if square.bottom_right.nil? and row != '8' and col != 'A'
+      square.link(@grid[(row.ord+1).chr][(col.ord+1).chr],:top_right) if square.top_right.nil? and row != '8' and col != 'H'
     end
   end
 
-  def initialize(white = :white, black = :green)
+  def initialize(white = :light_white, black = :green)
     @board = Board.new
     @white_color = white
     @black_color = black
+
+    Pawn.new(true,@board.grid['2']['E'])
+  end
+
+  def add_new_piece(square,piece)
+    piece.to_square(square)
   end
 
   def draw_board
-    system "clear" or system "cls"
+    #system "clear" or system "cls"
     count = 0
-    @board.grid.each do |col_name, row|
+    @board.grid.reverse_each do |col_name, row|
         draw_row(row, count)
       count += 1
     end
@@ -100,9 +125,9 @@ def draw_row(row, count)
     if num == 1
       row.each do |row_name,square|
         if color_count % 2 == 0
-          print (' '*2 + "♕" + ' '*3).colorize(:background => @white_color)
+          print (' '*2 + square.to_s + ' '*3).colorize(:background => @white_color)
         else
-          print (' '*2 + "♛" + ' '*3).colorize(:background => @black_color)
+          print (' '*2 + square.to_s + ' '*3).colorize(:background => @black_color)
         end
         color_count += 1
       end
@@ -122,19 +147,7 @@ end
 
 end
 
-class Piece
-  attr_accessor :column, :row, :image
-  def initialize(white = true, image = "♙")
-    @white = white
-  end
-  def is_white?
-    return @white
-  end
 
-  def is_black?
-    return !@white
-  end
-end
 
 chess = Chess.new
 chess.draw_board
