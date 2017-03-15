@@ -16,34 +16,34 @@ describe Chess do
       it "matches the grid coordinates to the square's row and column" do
         rand_col = (rand(8) + 64).chr
         rand_row = (rand(7)+1).to_s
-        test_square = board.grid[rand_col][rand_row]
+        test_square = board.grid[rand_row][rand_col]
         expect(test_square.row).to eql(rand_row)
         expect(test_square.column).to eql(rand_col)
       end
       it "will traverse bottom to top" do
-        start_square = board.grid['A']['1']
+        start_square = board.grid['1']['A']
         start_square = start_square.above until start_square.above.nil?
-        expect(start_square).to equal(board.grid['A']['8'])
+        expect(start_square).to equal(board.grid['8']['A'])
       end
     end
     context "When traversing the board" do
       it "traverses from bottom to top" do
-        start_square = board.grid['A']['1']
+        start_square = board.grid['1']['A']
         fail_count = 0
         until start_square.above.nil? or fail_count > 10 do
           start_square = start_square.above
           fail_count += 1
         end
-        expect(start_square).to equal board.grid['A']['8']
+        expect(start_square).to equal board.grid['8']['A']
       end
       it "traverses from one diagonal to another" do
-        start_square = board.grid['A']['1']
+        start_square = board.grid['1']['A']
         fail_count = 0
         until start_square.top_right.nil? or fail_count > 10 do
           start_square = start_square.top_right
           fail_count += 1
         end
-        expect(start_square).to equal board.grid['H']['8']
+        expect(start_square).to equal board.grid['8']['H']
       end
     end
     describe Chess::Board::Square do
