@@ -103,16 +103,41 @@ include Pieces
     @board = Board.new
     @white_color = white
     @black_color = black
-
-    King.new(false,@board.grid['4']['C'])
-    Knight.new(true,@board.grid['4']['H'])
-    Pawn.new(false,@board.grid['7']['E'])
-    Pawn.new(true,@board.grid['3']['D'])
-    Bishop.new(false, @board.grid['4']['B'])
-
-
+    setup_board
   end
 
+  def setup_board
+    setup_white
+    setup_black
+  end
+
+  def setup_white
+    ('A'..'H').each do |char|
+      Pawn.new(true,@board.grid['2'][char])
+    end
+    Rook.new(true,@board.grid['1']['A'])
+    Rook.new(true,@board.grid['1']['H'])
+    Knight.new(true,@board.grid['1']['B'])
+    Knight.new(true,@board.grid['1']['G'])
+    Bishop.new(true,@board.grid['1']['C'])
+    Bishop.new(true,@board.grid['1']['F'])
+    King.new(true,@board.grid['1']['E'])
+    Queen.new(true,@board.grid['1']['D'])
+  end
+
+  def setup_black
+    ('A'..'H').each do |char|
+      Pawn.new(false,@board.grid['7'][char])
+    end
+    Rook.new(false,@board.grid['8']['A'])
+    Rook.new(false,@board.grid['8']['H'])
+    Knight.new(false,@board.grid['8']['B'])
+    Knight.new(false,@board.grid['8']['G'])
+    Bishop.new(false,@board.grid['8']['C'])
+    Bishop.new(false,@board.grid['8']['F'])
+    King.new(false,@board.grid['8']['E'])
+    Queen.new(false,@board.grid['8']['D'])
+  end
   def add_new_piece(square,piece)
     piece.to_square(square)
   end
@@ -131,7 +156,7 @@ include Pieces
   end
 
   def draw_board
-    #system "clear" or system "cls"
+    system "clear" or system "cls"
     count = 0
     @board.grid.reverse_each do |col_name, row|
         draw_row(row, count)
@@ -192,11 +217,17 @@ end
 
 
 chess = Chess.new
-chess.hightlight_squares(chess.board.grid['4']['C'].piece.legal_moves)
 chess.draw_board
 puts chess.get_all_pieces.map!{|piece| piece.image}.join('-')
 puts chess.get_all_pieces(:white).map!{|piece| piece.image}.join('-')
 puts chess.get_all_pieces(:black).map!{|piece| piece.image}.join('-')
-puts chess.board.grid['4']['E'].piece.can_capture.inspect
+chess.get_all_pieces(:white).each do |piece|
+  if piece.legal_moves.length > 0
+    puts "#{piece.image}"
+    piece.legal_moves.each do |square|
+      puts "\t#{square.to_move}"
+    end
+  end
+end
 
 #puts chess.board.grid['4']['E'].piece.can_capture.inspect
