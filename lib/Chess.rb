@@ -140,13 +140,16 @@ include Pieces
   end
 
   #Should be in the form [col][row] for both. EG: E4, A1
-  def make_move(start_square, end_square)
+  def make_move(start_square, end_square, color)
     return :bad_format unless start_square.size == 2 and end_square.size == 2
     return :start_out_of_bounds unless start_square[0].between?('A','H') and start_square[1].between?('1','8')
     return :end_out_of_bounds unless end_square[0].between?('A','H') and end_square[1].between?('1','8')
     return :no_piece_found if @board.grid[start_square[1]][start_square[0]].piece.nil?
+    return :not_a_color unless color == :white or color == :black
     moving_piece = @board.grid[start_square[1]][start_square[0]].piece
     landing_square = @board.grid[end_square[1]][end_square[0]]
+    return :cannot_move_white_piece if moving_piece.is_white? and color != :white
+    return :cannot_move_black_piece if moving_piece.is_black? and color != :black
     return :invalid_move unless moving_piece.legal_moves.include? landing_square
     if moving_piece.can_capture.include? landing_square
       capture(moving_piece, landing_square)
@@ -179,7 +182,6 @@ include Pieces
   end
 
   def draw_board
-    #system "clear" or system "cls"
     count = 0
     @board.grid.reverse_each do |col_name, row|
         draw_row(row, count)
@@ -238,7 +240,7 @@ end
 end
 
 
-
+=begin
 chess = Chess.new
 chess.make_move('E2','E4')
 chess.make_move('D7','D5')
@@ -248,9 +250,6 @@ puts "White captured: #{chess.white_captured.map{|piece| piece.image}.join('-')}
 puts "Black captured: #{chess.black_captured.map{|piece| piece.image}.join('-')}"
 
 
-
-
-=begin
 puts chess.get_all_pieces.map!{|piece| piece.image}.join('-')
 puts chess.get_all_pieces(:white).map!{|piece| piece.image}.join('-')
 puts chess.get_all_pieces(:black).map!{|piece| piece.image}.join('-')
