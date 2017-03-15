@@ -69,6 +69,13 @@ class Piece
     end
     return index_square
   end
+
+  #Returns all the pieces that the current pawn can capture in a given turn
+  def can_capture
+    legal_move_list = self.legal_moves
+    return legal_move_list.keep_if {|square| !square.piece.nil?}
+  end
+
 end
 class Pawn < Piece
   attr_reader :image
@@ -76,12 +83,6 @@ class Pawn < Piece
       super
       @image = '♟'.colorize(@@WhiteColor) if is_white?
       @image = '♟'.colorize(@@BlackColor) if is_black?
-  end
-
-  #Returns all the pieces that the current pawn can capture in a given turn
-  def can_capture
-    legal_move_list = self.legal_moves
-    return legal_move_list.keep_if {|square| !square.piece}
   end
 
   #Returns an array of squares that are legal moves for the piece this turn
@@ -131,11 +132,6 @@ class Knight < Piece
       @image = '♞'.colorize(@@BlackColor) if is_black?
   end
 
-  #Returns all the pieces that the current pawn can capture in a given turn
-  def can_capture
-    legal_move_list = self.legal_moves
-    return legal_move_list.keep_if {|square| !square.piece}
-  end
 
   #Returns an array of squares that are legal moves for the piece this turn
   def legal_moves
@@ -145,6 +141,90 @@ class Knight < Piece
       legal_move_list << moved_square unless moved_square.nil? or friend_exists(moved_square)
     end
     return legal_move_list
+  end
+end
+class Bishop < Piece
+  attr_reader :image
+  def initialize(white = true, square = nil)
+      super
+      @image = '♝'.colorize(@@WhiteColor) if is_white?
+      @image = '♝'.colorize(@@BlackColor) if is_black?
+  end
+
+  def legal_moves
+    legal_move_list = []
+    ##Top left diagonal
+    index_square = @current_square
+    until index_square.top_left.nil? or !index_square.top_left.piece.nil? do
+      index_square = index_square.top_left
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.top_left if opponent_exists(index_square.top_left)
+
+    ##Top right diagonal
+    index_square = @current_square
+    until index_square.top_right.nil? or !index_square.top_right.piece.nil? do
+      index_square = index_square.top_right
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.top_right if opponent_exists(index_square.top_right)
+
+    ##Bottom left diagonal
+    index_square = @current_square
+    until index_square.bottom_left.nil? or !index_square.bottom_left.piece.nil? do
+      index_square = index_square.bottom_left
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.bottom_left if opponent_exists(index_square.bottom_left)
+
+    ##Bottom right diagonal
+    index_square = @current_square
+    until index_square.bottom_right.nil? or !index_square.bottom_right.piece.nil? do
+      index_square = index_square.bottom_right
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.bottom_right if opponent_exists(index_square.bottom_right)
+
+    return legal_move_list
+  end
+end
+
+class Rook < Piece
+  attr_reader :image
+  def initialize(white = true, square = nil)
+      super
+      @image = '♜'.colorize(@@WhiteColor) if is_white?
+      @image = '♜'.colorize(@@BlackColor) if is_black?
+  end
+
+  def legal_moves
+
+  end
+end
+
+class Queen < Piece
+  attr_reader :image
+  def initialize(white = true, square = nil)
+      super
+      @image = '♛'.colorize(@@WhiteColor) if is_white?
+      @image = '♛'.colorize(@@BlackColor) if is_black?
+  end
+
+  def legal_moves
+
+  end
+end
+
+class King < Piece
+  attr_reader :image
+  def initialize(white = true, square = nil)
+      super
+      @image = '♚'.colorize(@@WhiteColor) if is_white?
+      @image = '♚'.colorize(@@BlackColor) if is_black?
+  end
+
+  def legal_moves
+
   end
 end
 

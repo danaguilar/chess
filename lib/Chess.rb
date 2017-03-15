@@ -1,5 +1,9 @@
 require 'colorize'
 require_relative 'Pieces.rb'
+
+##IDEAS
+#Captured pieces off to the side for each side
+#Maybe speed chess?
 class Chess
 include Pieces
   attr_accessor :board
@@ -100,10 +104,11 @@ include Pieces
     @white_color = white
     @black_color = black
 
-    Knight.new(false,@board.grid['4']['E'])
-    Knight.new(true,@board.grid['2']['F'])
-    Pawn.new(false,@board.grid['6']['D'])
-    Pawn.new(true,@board.grid['2']['A'])
+    Bishop.new(false,@board.grid['4']['E'])
+    Knight.new(true,@board.grid['3']['F'])
+    Pawn.new(false,@board.grid['6']['C'])
+    Pawn.new(true,@board.grid['2']['C'])
+    Bishop.new(false, @board.grid['7']['H'])
 
 
   end
@@ -120,8 +125,8 @@ include Pieces
       end
     end
     return pieces if color == :all
-    return pieces.keep_if{|piece| piece.is_white} if color == :white
-    return pieces.keep_if{|piece| piece.is_black} if color == :black
+    return pieces.keep_if{|piece| piece.is_white?} if color == :white
+    return pieces.keep_if{|piece| piece.is_black?} if color == :black
     return []
   end
 
@@ -189,5 +194,9 @@ end
 chess = Chess.new
 chess.hightlight_squares(chess.board.grid['4']['E'].piece.legal_moves)
 chess.draw_board
-puts chess.get_all_pieces.inspect
+puts chess.get_all_pieces.map!{|piece| piece.image}.join('-')
+puts chess.get_all_pieces(:white).map!{|piece| piece.image}.join('-')
+puts chess.get_all_pieces(:black).map!{|piece| piece.image}.join('-')
+puts chess.board.grid['4']['E'].piece.can_capture.inspect
+
 #puts chess.board.grid['4']['E'].piece.can_capture.inspect
