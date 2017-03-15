@@ -104,11 +104,11 @@ include Pieces
     @white_color = white
     @black_color = black
 
-    Bishop.new(false,@board.grid['4']['E'])
-    Knight.new(true,@board.grid['3']['F'])
-    Pawn.new(false,@board.grid['6']['C'])
-    Pawn.new(true,@board.grid['2']['C'])
-    Bishop.new(false, @board.grid['7']['H'])
+    King.new(false,@board.grid['4']['C'])
+    Knight.new(true,@board.grid['4']['H'])
+    Pawn.new(false,@board.grid['7']['E'])
+    Pawn.new(true,@board.grid['3']['D'])
+    Bishop.new(false, @board.grid['4']['B'])
 
 
   end
@@ -192,7 +192,7 @@ end
 
 
 chess = Chess.new
-chess.hightlight_squares(chess.board.grid['4']['E'].piece.legal_moves)
+chess.hightlight_squares(chess.board.grid['4']['C'].piece.legal_moves)
 chess.draw_board
 puts chess.get_all_pieces.map!{|piece| piece.image}.join('-')
 puts chess.get_all_pieces(:white).map!{|piece| piece.image}.join('-')

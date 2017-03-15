@@ -188,7 +188,6 @@ class Bishop < Piece
     return legal_move_list
   end
 end
-
 class Rook < Piece
   attr_reader :image
   def initialize(white = true, square = nil)
@@ -198,7 +197,40 @@ class Rook < Piece
   end
 
   def legal_moves
+    legal_move_list = []
+    ##Above movement
+    index_square = @current_square
+    until index_square.above.nil? or !index_square.above.piece.nil? do
+      index_square = index_square.above
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.above if opponent_exists(index_square.above)
 
+    ##below movement
+    index_square = @current_square
+    until index_square.below.nil? or !index_square.below.piece.nil? do
+      index_square = index_square.below
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.below if opponent_exists(index_square.below)
+
+    ##left movement
+    index_square = @current_square
+    until index_square.left.nil? or !index_square.left.piece.nil? do
+      index_square = index_square.left
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.left if opponent_exists(index_square.left)
+
+    ##right movement
+    index_square = @current_square
+    until index_square.right.nil? or !index_square.right.piece.nil? do
+      index_square = index_square.right
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.right if opponent_exists(index_square.right)
+
+    return legal_move_list
   end
 end
 
@@ -211,7 +243,72 @@ class Queen < Piece
   end
 
   def legal_moves
+    legal_move_list = []
+    ##Above movement
+    index_square = @current_square
+    until index_square.above.nil? or !index_square.above.piece.nil? do
+      index_square = index_square.above
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.above if opponent_exists(index_square.above)
 
+    ##below movement
+    index_square = @current_square
+    until index_square.below.nil? or !index_square.below.piece.nil? do
+      index_square = index_square.below
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.below if opponent_exists(index_square.below)
+
+    ##left movement
+    index_square = @current_square
+    until index_square.left.nil? or !index_square.left.piece.nil? do
+      index_square = index_square.left
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.left if opponent_exists(index_square.left)
+
+    ##right movement
+    index_square = @current_square
+    until index_square.right.nil? or !index_square.right.piece.nil? do
+      index_square = index_square.right
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.right if opponent_exists(index_square.right)
+
+    ##Top left diagonal
+    index_square = @current_square
+    until index_square.top_left.nil? or !index_square.top_left.piece.nil? do
+      index_square = index_square.top_left
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.top_left if opponent_exists(index_square.top_left)
+
+    ##Top right diagonal
+    index_square = @current_square
+    until index_square.top_right.nil? or !index_square.top_right.piece.nil? do
+      index_square = index_square.top_right
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.top_right if opponent_exists(index_square.top_right)
+
+    ##Bottom left diagonal
+    index_square = @current_square
+    until index_square.bottom_left.nil? or !index_square.bottom_left.piece.nil? do
+      index_square = index_square.bottom_left
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.bottom_left if opponent_exists(index_square.bottom_left)
+
+    ##Bottom right diagonal
+    index_square = @current_square
+    until index_square.bottom_right.nil? or !index_square.bottom_right.piece.nil? do
+      index_square = index_square.bottom_right
+      legal_move_list << index_square
+    end
+    legal_move_list << index_square.bottom_right if opponent_exists(index_square.bottom_right)
+
+    return legal_move_list
   end
 end
 
@@ -224,7 +321,16 @@ class King < Piece
   end
 
   def legal_moves
-
+    legal_move_list = []
+    legal_move_list << @current_square.above unless @current_square.above.nil? or friend_exists(@current_square.above)
+    legal_move_list << @current_square.below unless @current_square.below.nil? or friend_exists(@current_square.below)
+    legal_move_list << @current_square.left unless @current_square.left.nil? or friend_exists(@current_square.left)
+    legal_move_list << @current_square.right unless @current_square.right.nil? or friend_exists(@current_square.right)
+    legal_move_list << @current_square.top_right unless @current_square.top_right.nil? or friend_exists(@current_square.top_right)
+    legal_move_list << @current_square.top_left unless @current_square.top_left.nil? or friend_exists(@current_square.top_left)
+    legal_move_list << @current_square.bottom_left unless @current_square.bottom_left.nil? or friend_exists(@current_square.bottom_left)
+    legal_move_list << @current_square.bottom_right unless @current_square.bottom_right.nil? or friend_exists(@current_square.bottom_right)
+    return legal_move_list
   end
 end
 
