@@ -6,7 +6,7 @@ require_relative 'Pieces.rb'
 #Maybe speed chess?
 class Chess
 include Pieces
-  attr_accessor :board
+  attr_accessor :board, :white_captured, :black_captured
   class Board
     attr_accessor :grid
     class Square
@@ -103,6 +103,8 @@ include Pieces
     @board = Board.new
     @white_color = white
     @black_color = black
+    @white_captured = Array.new
+    @black_captured = Array.new
     setup_board
   end
 
@@ -110,7 +112,6 @@ include Pieces
     setup_white
     setup_black
   end
-
   def setup_white
     ('A'..'H').each do |char|
       Pawn.new(true,@board.grid['2'][char])
@@ -124,7 +125,6 @@ include Pieces
     King.new(true,@board.grid['1']['E'])
     Queen.new(true,@board.grid['1']['D'])
   end
-
   def setup_black
     ('A'..'H').each do |char|
       Pawn.new(false,@board.grid['7'][char])
@@ -138,9 +138,32 @@ include Pieces
     King.new(false,@board.grid['8']['E'])
     Queen.new(false,@board.grid['8']['D'])
   end
-  def add_new_piece(square,piece)
+
+  #Should be in the form [col][row] for both. EG: E4, A1
+  def make_move(start_square, end_square)
+    return :bad_format unless start_square.size == 2 and end_square.size == 2
+    return :start_out_of_bounds unless start_square[0].between?('A','H') and start_square[1].between?('1','8')
+    return :end_out_of_bounds unless end_square[0].between?('A','H') and end_square[1].between?('1','8')
+    return :no_piece_found if @board.grid[start_square[1]][start_square[0]].piece.nil?
+    moving_piece = @board.grid[start_square[1]][start_square[0]].piece
+    landing_square = @board.grid[end_square[1]][end_square[0]]
+    return :invalid_move unless moving_piece.legal_moves.include? landing_square
+    if moving_piece.can_capture.include? landing_square
+      capture(moving_piece, landing_square)
+    else
+      moving_piece.to_square(landing_square)
+    end
+    return :success
+  end
+
+  def capture(piece,square)
+    captured_piece = square.piece
+    captured_piece.is_white? ? @black_captured << captured_piece : @white_captured << captured_piece
+    captured_piece.current_square = nil
+    square.piece = nil
     piece.to_square(square)
   end
+
 
   def get_all_pieces(color = :all)
     pieces = Array.new
@@ -156,7 +179,7 @@ include Pieces
   end
 
   def draw_board
-    system "clear" or system "cls"
+    #system "clear" or system "cls"
     count = 0
     @board.grid.reverse_each do |col_name, row|
         draw_row(row, count)
@@ -217,7 +240,17 @@ end
 
 
 chess = Chess.new
+chess.make_move('E2','E4')
+chess.make_move('D7','D5')
+chess.make_move('E4','D5')
 chess.draw_board
+puts "White captured: #{chess.white_captured.map{|piece| piece.image}.join('-')}"
+puts "Black captured: #{chess.black_captured.map{|piece| piece.image}.join('-')}"
+
+
+
+
+=begin
 puts chess.get_all_pieces.map!{|piece| piece.image}.join('-')
 puts chess.get_all_pieces(:white).map!{|piece| piece.image}.join('-')
 puts chess.get_all_pieces(:black).map!{|piece| piece.image}.join('-')
@@ -229,5 +262,6 @@ chess.get_all_pieces(:white).each do |piece|
     end
   end
 end
+=end
 
 #puts chess.board.grid['4']['E'].piece.can_capture.inspect
