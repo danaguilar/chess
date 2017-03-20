@@ -10,12 +10,16 @@ class Game
   def play
     turn = 0
     while true do
+      #system "clear" or system "cls"
+      puts chess.check_board.grid.inspect
       active_player = @players[turn%2]
       chess.draw_board
+      puts "CHECK!" if chess.in_check?(active_player)
       make_move(active_player)
       turn += 1
     end
   end
+
 
   def player_to_string(player)
     return "white" if player == :white
@@ -29,7 +33,7 @@ class Game
       puts "Choose a move"
       move = gets.chomp
       move_set = parse_move(move)
-      error = chess.make_move(move_set[0],move_set[1],active_player)
+      error = chess.make_new_move(move_set[0],move_set[1],active_player)
       case error
       when :bad_format
         puts "Incorrect Format"
@@ -60,12 +64,14 @@ class Game
     end
   end
   def parse_move(move)
-    move.upcase!
-    return move.split('-')
+    if move.include?('-')
+      move.upcase!
+      return move.split('-')
+    else
+      return [move,'']
+    end
   end
+
 end
 
 new_game = Game.new
-
-
-    #system "clear" or system "cls"
