@@ -4,19 +4,30 @@ class Game
   def initialize
     @chess = Chess.new
     @players = [:white, :black]
-    self. play
+    @turn = 0
+    @saved_turn = 0
+    self.play
   end
 
+
   def play
-    turn = 0
     while true do
-      #system "clear" or system "cls"
-      puts chess.check_board.grid.inspect
-      active_player = @players[turn%2]
+      system "clear" or system "cls"
+      active_player = @players[@turn%2]
       chess.draw_board
+      break if chess.legal_moves(active_player).length == 0
       puts "CHECK!" if chess.in_check?(active_player)
       make_move(active_player)
-      turn += 1
+      @turn += 1
+    end
+    current_player = @players[@turn%2]
+    other_player = @players[(@turn+1)%2]
+    if chess.in_check?(current_player)
+      puts "CHECKMATE!"
+      puts "#{player_to_string(other_player)} wins the game!"
+    else
+      puts "STALEMATE!"
+      puts "DRAW!"
     end
   end
 
@@ -26,8 +37,10 @@ class Game
     return "black" if player == :black
     return "wut?"
   end
+
   def make_move(active_player)
     puts "#{player_to_string(active_player).upcase} TO MOVE"
+    puts "#{chess.legal_moves(active_player).length} possible moves"
     error = :none
     until error == :success
       puts "Choose a move"
@@ -35,6 +48,12 @@ class Game
       move_set = parse_move(move)
       error = chess.make_new_move(move_set[0],move_set[1],active_player)
       case error
+      when :saved
+        @saved_turn = @turn - 1
+        puts "Game state saved"
+      when :loaded
+        @turn = @saved_turn
+        error = :success
       when :bad_format
         puts "Incorrect Format"
         puts "Make sure your move is written as start - end"

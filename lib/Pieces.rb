@@ -18,11 +18,11 @@ class Piece
     return !@white
   end
 
-  def to_square(square)
+  def to_square(square,true_move = true)
     @current_square.piece = nil unless @current_square.nil?
     @current_square = square
     square.piece = self
-    @has_moved = true
+    @has_moved = true if true_move
   end
 
   def opponent_exists(square)

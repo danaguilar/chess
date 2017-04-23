@@ -6,7 +6,7 @@ require_relative 'Pieces.rb'
 #Maybe speed chess?
 class Chess
 include Pieces
-  attr_accessor :board, :check_board, :white_captured, :black_captured, :white_king, :black_king
+  attr_accessor :board, :saved_board, :white_captured, :black_captured, :white_king, :black_king
   class Board
     attr_accessor :grid
     class Square
@@ -18,6 +18,7 @@ include Pieces
         @row = row
         @column = column
         @is_hightlighted = false
+        @file  = 'save_data'
       end
 
       def inspect
@@ -68,6 +69,7 @@ include Pieces
         return true
       end
     end
+
     def initialize
       @grid = Hash.new
       ('1'..'8').each do |num|
@@ -77,6 +79,14 @@ include Pieces
         end
       end
       connect_squares
+    end
+
+    def clear_squares
+      @grid.each do |col_name, row|
+        row.each do |row_name, square|
+          square.piece = nil
+        end
+      end
     end
     def connect_squares
       @grid.each do |col_name, row|
@@ -101,19 +111,19 @@ include Pieces
 
   def initialize(white = :light_white, black = :green)
     @board = Board.new
-    @check_board = Board.new
     @white_color = white
     @black_color = black
     @white_captured = Array.new
     @black_captured = Array.new
+    @saved_board = Array.new
     setup_board
-    self.copy_board
   end
 
   def setup_board
     setup_white
     setup_black
   end
+
   def setup_white
     ('A'..'H').each do |char|
       Pawn.new(true,@board.grid['2'][char])
@@ -141,7 +151,15 @@ include Pieces
     Queen.new(false,@board.grid['8']['D'])
   end
 
-  def make_new_move(start_square, end_square, color)
+  def make_new_move(start_square, end_square, color,true_move = true)
+    if start_square == "save"
+      save_state
+      return :saved
+    end
+    if start_square == "load"
+      load_state
+      return :loaded
+    end
     return :bad_format unless start_square.size == 2 and end_square.size == 2
     return :start_out_of_bounds unless start_square[0].between?('A','H') and start_square[1].between?('1','8')
     return :end_out_of_bounds unless end_square[0].between?('A','H') and end_square[1].between?('1','8')
@@ -152,9 +170,9 @@ include Pieces
       return :no_piece_found
     end
     if starting_square.piece.can_capture.include? landing_square
-      capture(starting_square.piece, landing_square)
+      capture(starting_square.piece, landing_square,true_move)
     else
-      starting_square.piece.to_square(landing_square)
+      starting_square.piece.to_square(landing_square,true_move)
     end
     return :success
   end
@@ -184,37 +202,49 @@ include Pieces
     end
   end
 
-  def check_all_moves(color)
-    legal_moves = Array.new
-    move_list = get_all_moves(color)
-      move_list.each do |move|
-        copy_board
-        make_test_move(move[0],move[1])
-          legal_moves << move unless is_test_check?(color)
-      end
+  def save_state
+    pieces = get_all_pieces
+    @saved_board = Array.new
+    pieces.each do |piece|
+      @saved_board << [piece,piece.current_square]
+    end
   end
 
-  def make_test_move(starting_square, ending_square)
-    test_start = [starting_square.column,starting_square.row]
-    test_end = [ending_square.column, ending_square.row]
+  def load_state
+    @board.clear_squares
+    @saved_board.each do |piece_move|
+      piece_move[0].to_square(piece_move[1],false)
+    end
   end
 
   def get_all_moves(color = :all)
     move_list = Array.new
     get_all_pieces(color).each do |piece|
-      piece.legal_moves.each   do |ending_square|
+      piece.legal_moves.each do |ending_square|
         move_list << Array.new([piece.current_square,ending_square])
       end
     end
     return move_list
   end
 
-  def capture(piece,square)
+  def legal_moves(color)
+    self.save_state
+    move_list = get_all_moves(color)
+    legal_moves = []
+    move_list.each do |move|
+      make_new_move(move[0].to_move,move[1].to_move,color,false)
+      legal_moves << move unless in_check?(color)
+      self.load_state
+    end
+    return legal_moves
+  end
+
+  def capture(piece,square,true_move)
     captured_piece = square.piece
     captured_piece.is_white? ? @black_captured << captured_piece : @white_captured << captured_piece
     captured_piece.current_square = nil
     square.piece = nil
-    piece.to_square(square)
+    piece.to_square(square,true_move)
   end
 
 
@@ -229,14 +259,6 @@ include Pieces
     return pieces.keep_if{|piece| piece.is_white?} if color == :white
     return pieces.keep_if{|piece| piece.is_black?} if color == :black
     return []
-  end
-
-  def copy_board
-    @board.grid.each do |col_name, row|
-      row.each do |row_name, square|
-        @check_board.grid[col_name][row_name].piece = square.piece
-      end
-    end
   end
 
   def draw_board
@@ -303,29 +325,3 @@ def draw_row(row, count, col_name)
 end
 
 end
-
-
-=begin
-chess = Chess.new
-chess.make_move('E2','E4')
-chess.make_move('D7','D5')
-chess.make_move('E4','D5')
-chess.draw_board
-puts "White captured: #{chess.white_captured.map{|piece| piece.image}.join('-')}"
-puts "Black captured: #{chess.black_captured.map{|piece| piece.image}.join('-')}"
-
-
-puts chess.get_all_pieces.map!{|piece| piece.image}.join('-')
-puts chess.get_all_pieces(:white).map!{|piece| piece.image}.join('-')
-puts chess.get_all_pieces(:black).map!{|piece| piece.image}.join('-')
-chess.get_all_pieces(:white).each do |piece|
-  if piece.legal_moves.length > 0
-    puts "#{piece.image}"
-    piece.legal_moves.each do |square|
-      puts "\t#{square.to_move}"
-    end
-  end
-end
-=end
-
-#puts chess.board.grid['4']['E'].piece.can_capture.inspect
